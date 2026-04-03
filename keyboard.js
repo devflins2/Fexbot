@@ -2,7 +2,7 @@ const { Keyboard } = require("grammy");
 
 const userMenu = new Keyboard()
     .text("🎁 Daily Reward").text("📺 Watch Video")
-    .row().text("👥 My Stats").resized();
+    .row().text("👥 My Stats/Refer").resized();
 
 const adminMenu = new Keyboard()
     .text("🎁 Daily Reward").text("📺 Watch Video")
