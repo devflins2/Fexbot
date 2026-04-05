@@ -125,8 +125,14 @@ bot.command("start", async (ctx) => {
             const referrer = await User.findOne({ userId: parseInt(payload) });
             if (referrer) {
                 referrer.referCount += 1;
+                referrer.credits += 5;
+                let msg = `🎉 New Referral! ${ctx.from.first_name} has joined.\n🎁 You received 5 credits.`;
+                if (referrer.referCount === 10) {
+                    referrer.credits += 50;
+                    msg += `\n\n🎊 Bonus! You reached 10 referrals and got 50 bonus credits!`;
+                }
                 await referrer.save();
-                await bot.api.sendMessage(referrer.userId, `🎉 New Referral! ${ctx.from.first_name} has joined.`);
+                await bot.api.sendMessage(referrer.userId, msg);
             }
         }
         await user.save();
@@ -234,7 +240,7 @@ bot.hears("🎁 Daily Reward", async (ctx) => {
 bot.hears("👥 My Stats/Refer", async (ctx) => {
     const user = await User.findOne({ userId: ctx.from.id });
     const refLink = `https://t.me/${bot.botInfo.username}?start=${ctx.from.id}`;
-    await ctx.reply(`📊 *Your Stats:*\n\n📺 Videos Watched: ${user.videosWatched}\n👥 Total Referrals: ${user.referCount}\n\n🔗 *Ref Link:* \`${refLink}\``, { parse_mode: "Markdown" });
+    await ctx.reply(`📊 *Your Stats:*\n\n📺 Videos Watched: ${user.videosWatched}\n👥 Total Referrals: ${user.referCount}\n\n🔗 *Ref Link:* \`${refLink}\`\n\n💡 *Invite friends to earn credits!*\n- Get 5 credits per referral\n- When 10 referrals, get 50 bonus credits!`, { parse_mode: "Markdown" });
 });
 
 bot.hears("📊 Global Stats", async (ctx) => {
