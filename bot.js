@@ -264,7 +264,7 @@ bot.hears("📊 Global Stats", async (ctx) => {
 });
 
 // --- ALL USERS LIST (ADMIN ONLY) ---
-bot.hears("👥 All Users", async (ctx) => {
+/*bot.hears("👥 All Users", async (ctx) => {
     const user = await User.findOne({ userId: ctx.from.id });
     if (!user || (!user.isAdmin && !user.isMainAdmin)) return;
 
@@ -282,7 +282,61 @@ bot.hears("👥 All Users", async (ctx) => {
     } else {
         await ctx.reply(text, { parse_mode: "Markdown" });
     }
+});*/
+
+const delay = (ms) => new Promise(res => setTimeout(res, ms));
+
+bot.hears("👥 All Users", async (ctx) => {
+    const user = await User.findOne({ userId: ctx.from.id });
+    if (!user || (!user.isAdmin && !user.isMainAdmin)) return;
+
+    const allUsers = await User.find();
+    const chunkSize = 20;
+    const total = allUsers.length;
+
+    for (let i = 0; i < total; i += chunkSize) {
+        const chunk = allUsers.slice(i, i + chunkSize);
+
+        let header = `👥 *Users ${i + 1} - ${i + chunk.length} / ${total}*\n\n`;
+
+        let messages = [];
+        let currentText = header;
+
+        for (let j = 0; j < chunk.length; j++) {
+            const u = chunk[j];
+
+            const username = u.telegramUsername
+                ? `@${u.telegramUsername}`
+                : (u.userName || 'No Name');
+
+            const line = `${i + j + 1}. ID: \`${u.userId}\` | ${username} | Watched: ${u.videosWatched} | Credits: ${u.credits}\n`;
+
+            // 🔥 agar next line add karne se 2000 cross ho raha hai
+            if ((currentText + line).length > 2000) {
+                messages.push(currentText);
+                currentText = header + line; // new message with header
+            } else {
+                currentText += line;
+            }
+        }
+
+        // last remaining text push karo
+        if (currentText.trim().length > header.trim().length) {
+            messages.push(currentText);
+        }
+
+        // send all messages of this 20-user batch
+        for (const msg of messages) {
+            await ctx.reply(msg, { parse_mode: "Markdown" });
+            await delay(500);
+        }
+
+        // next 20 users ke liye delay
+        await delay(1000);
+    }
 });
+
+
 
 bot.command("find", async (ctx) => {
     const user = await User.findOne({ userId: ctx.from.id });
@@ -542,4 +596,4 @@ cron.schedule('59 23 * * 0', async () => {
     timezone: "Asia/Kolkata"
 });
 
-bot.start();
+bot.start();
