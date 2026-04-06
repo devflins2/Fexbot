@@ -310,14 +310,14 @@ bot.hears("👥 All Users", async (ctx) => {
 
             console.log(`Sending batch: ${i + 1} - ${i + chunk.length}`);
 
-            await ctx.reply(text, { parse_mode: "Markdown" });
+            await ctx.reply(text);
 
             if (i + chunkSize < total) {
                 await delay(1200); // thoda safe delay
             }
         }
 
-        console.log("✅ All batches sent");
+       await ctx.reply("✅ All batches sent");
 
     } catch (err) {
         console.error("❌ Error in All Users:", err);
